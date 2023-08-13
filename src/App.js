@@ -5,7 +5,7 @@ function Square({value, onSquareClick}) {
   return <button className="square" onClick={onSquareClick}>{value}</button>;
 }
 
-function Board({xIsNext, squares, onPlay}) {
+function Board({xIsNext, squares, onPlay, currentMove}) {
   const handleClick = (i) => {
     if (squares[i] || calculateWinner(squares)) return;
     const nextSquares = squares.slice();
@@ -26,6 +26,7 @@ function Board({xIsNext, squares, onPlay}) {
   return (
     <div>
       <div className='status'>{status}</div>
+      <div className='current-move'>Current move: {currentMove + 1}</div>
       <div className="board-row">
         <Square value={squares[0]} onSquareClick={() => handleClick(0)}/>
         <Square value={squares[1]} onSquareClick={() => handleClick(1)}/>
@@ -46,15 +47,17 @@ function Board({xIsNext, squares, onPlay}) {
 }
 
 export default function Game() {
-  const [xIsNext, setXIsNext] = useState(false);
   const [history, setHistory] = useState([Array(9).fill(null)])
-  const currentSquares = history[history.length - 1]
+  const [currentMove, setCurrentMove] = useState(0);
+  const xIsNext = currentMove % 2 === 0;
+  const currentSquares = history[currentMove]
   const handlePlay = (nextSquares) => {
-    setHistory([...history, nextSquares])
-    setXIsNext(!xIsNext)
+    const nextHistory = [...history.slice(0, currentMove + 1), nextSquares]
+    setHistory(nextHistory)
+    setCurrentMove(nextHistory.length - 1)
   }
-  const jumtTo = (jumpTo) => {
-
+  const jumtTo = (nextMove) => {
+    setCurrentMove(nextMove);
   }
   const moves = history.map((squeres, move) => {
     let desc;
@@ -72,7 +75,7 @@ export default function Game() {
   return (
     <div className='game'>
       <div className='game-bord'>
-        <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay} />
+        <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay} currentMove={currentMove} />
       </div>
       <div className='game-info'>
         <ol>
@@ -84,7 +87,6 @@ export default function Game() {
 }
 
 const calculateWinner = (squares) => {
-  console.log(squares)
   const lines = [
     [0, 1, 2],
     [3, 4, 5],
